@@ -1,15 +1,18 @@
-from flask import request
+from flask import request, Flask
 from flask_restful import Api, Resource
 from flask_sqlalchemy import SQLAlchemy
-from ..models.user_model import User
+
 
 class UserResource(Resource):
-    def __init__(self, db):
-        super().__init__()
+    #TODO: User Resource needs to be restructured to fit with the newly restructured User Model
+    def __init__(self, app=Flask, db=SQLAlchemy):
+        self.app = app
         self.db = db
+        super().__init__()
+
 
     def get(self, user_id):
-        user_model = User(self.db, '', '', '')
+        user_model = User(self.app, self.db, '', '', '')
         UserModel = user_model.create_table()
 
         user = UserModel.query.get(user_id)
