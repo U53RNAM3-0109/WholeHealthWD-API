@@ -1,8 +1,6 @@
-#from api import api
 #from config import KeyVaultManager
-import os
 
-from api.api import BtecBytesAPI
+from api import BtecBytesAPI
 
-app = BtecBytesAPI(__name__, 'sqlite:///test.db', None)
+app = BtecBytesAPI(__name__, 'sqlite:///test.db')
 app.run(debug=True)
