@@ -1,34 +1,55 @@
 from flask import request, Flask
 from flask_restful import Api, Resource
-from flask_sqlalchemy import SQLAlchemy
+import json
 
 
 class UserResource(Resource):
-    #TODO: User Resource needs to be restructured to fit with the newly restructured User Model
-    def __init__(self, app=Flask, db=SQLAlchemy):
+    def __init__(self, app):
         self.app = app
-        self.db = db
         super().__init__()
 
+    def get(self):
+        users = self.app.UserModel.query.all()
+        data = []
+        for user in users:
+            data.append(user.to_json_formatable())
+
+        if data:
+            return data
+        else:
+            return {'message': 'No users found'}
+
+    def post(self):
+        req = request.get_json()
+        data = json.loads(req)
+
+        try:
+            new_user = self.app.UserModel(
+                username=data["username"],
+                email=data["email"],
+                password=data["password"])
+
+            self.app.db.session.add(new_user)
+            self.app.db.session.commit()
+        except Exception as exc:
+            print(exc)
+            return "Error occurred, see console"
+
+        if new_user:
+            return new_user.to_json_formatable()
+        else:
+            return "Returned None"
+
+
+class SpecifiedUserResource(Resource):
+    def __init__(self, app):
+        self.app = app
+        super().__init__()
 
     def get(self, user_id):
-        user_model = User(self.app, self.db, '', '', '')
-        UserModel = user_model.create_table()
+        user = self.app.db.get_or_404(self.app.UserModel, user_id)
 
-        user = UserModel.query.get(user_id)
         if user:
-            return {
-                'id':user.id,
-                'username':user.username,
-                'email':user.email
-            }
+            return user.to_json_formatable()
         else:
-            return {'message':'User not found'}
-
-    def post(self, user_id):
-        data = request.get_json()
-        user_model = User(self.db, data['username'], data['email'], data['password'])
-        UserModel=user_model.create_table()
-        new_user = UserModel(username=data['username'],
-                             email=data['email'],
-                             password=data['password'])
+            return {'message': 'User not found'}
