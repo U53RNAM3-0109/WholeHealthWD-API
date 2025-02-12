@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask import Flask
+from api.models import common_model_addons as cmn
 
 class User:
 
@@ -7,22 +8,26 @@ class User:
         self.app : Flask = app
         self.db : SQLAlchemy() = db
 
-    def defineModel(self):
-
-        class UserModel(self.db.Model):
-            __tablename__ = 'users'
-            id = self.db.Column(self.db.Integer, primary_key=True)
+    def define_model(self):
+        class UserModel(self.db.Model, cmn.BaseIDandTableName, cmn.TimestampCreatedMixin, cmn.TimestampLastEditMixin):
             username = self.db.Column(self.db.String, nullable=False)
             email = self.db.Column(self.db.String, unique=True, nullable=False)
             password = self.db.Column(self.db.String, nullable=False)
 
-            def __init__(self, id, username, email, password):
-                self.id = id
+            def __init__(self, username, email, password):
+                super().__init__()
                 self.username = username
                 self.email = email
                 self.password = password
 
-            def __repr__(self):
-                return f'<User {self.username}>'
+            def to_dict(self):
+                #TODO: Move JSON Serialisation related functions to use Marshmallow Schemas
+                data = {'id':self.id,
+                        'username':self.username,
+                        'email':self.email,
+                        'password':self.password,
+                        'created_at':str(self.created_at),
+                        'last_edit':str(self.last_edit)}
+                return data
 
         return UserModel

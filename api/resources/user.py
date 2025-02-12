@@ -12,7 +12,7 @@ class UserResource(Resource):
         users = self.app.UserModel.query.all()
         data = []
         for user in users:
-            data.append(user.to_json_formatable())
+            data.append(user.to_dict())
 
         if data:
             return data
@@ -36,7 +36,7 @@ class UserResource(Resource):
             return "Error occurred, see console"
 
         if new_user:
-            return new_user.to_json_formatable()
+            return new_user.to_dict()
         else:
             return "Returned None"
 
@@ -50,6 +50,6 @@ class SpecifiedUserResource(Resource):
         user = self.app.db.get_or_404(self.app.UserModel, user_id)
 
         if user:
-            return user.to_json_formatable()
+            return user.to_dict()
         else:
             return {'message': 'User not found'}
