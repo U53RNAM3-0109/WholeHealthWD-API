@@ -1,10 +1,10 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import event
 
-from .models.user_model import User
-from .models.user_child_models.admin_model import Admin
-from .models.user_child_models.student_model import Student
-from .models.user_child_models.teacher_model import Teacher
+from .models.user_models.user_model import User
+from .models.user_models.user_child_models.admin_model import Admin
+from .models.user_models.user_child_models.student_model import Student
+from .models.user_models.user_child_models.teacher_model import Teacher
 
 
 from .resources import user
