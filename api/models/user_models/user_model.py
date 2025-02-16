@@ -22,15 +22,17 @@ class User:
                 self.email = email
                 self.password = password
 
-            def to_dict(self):
+            def to_dict(self, detailed=False):
                 # TODO: Move JSON Serialisation related functions to use Marshmallow Schemas
-                data = {'id': self.id,
-                        'firstname': self.firstname,
-                        'lastname': self.lastname,
-                        'email': self.email,
-                        'password': self.password,
-                        'created_at': str(self.created_at),
-                        'last_edit': str(self.last_edit)}
+                if detailed:
+                    data = {'id': self.id,
+                            'firstname': self.firstname,
+                            'lastname': self.lastname,
+                            'email': self.email,
+                            'created_at': str(self.created_at),
+                            'last_edit': str(self.last_edit)}
+                else:
+                    data = {'id': self.id}
                 return data
 
         return UserModel
