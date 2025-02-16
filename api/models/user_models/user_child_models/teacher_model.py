@@ -3,17 +3,17 @@ from flask import Flask
 from api.models import common_model_addons as cmn
 
 
-class Student:
+class Teacher:
 
     def __init__(self, app, db):
         self.app: Flask = app
         self.db: SQLAlchemy() = db
 
     def define_model(self):
-        class StudentModel(self.db.Model, cmn.BaseIDandTableName):
+        class TeacherModel(self.db.Model, cmn.BaseIDandTableName):
             user_id = self.db.Column(self.db.Integer, self.db.ForeignKey('user.id'), unique=True)
 
-            user = self.db.relationship('UserModel', backref='admin', uselist=False)
+            user = self.db.relationship('UserModel', backref='teacher', uselist=False)
 
             def __init__(self, user_id):
                 self.user_id = user_id
@@ -21,4 +21,4 @@ class Student:
             def to_dict(self):
                 return {"id": self.id,
                         "user_id": self.user_id}
-        return StudentModel
+        return TeacherModel
