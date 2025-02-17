@@ -2,11 +2,23 @@ from flask_restful import Api, Resource
 from flask_restful.reqparse import RequestParser
 
 class UserResource(Resource):
+    """
+    Provides generic resources for creating and reading Users.
+
+    :param app: The flask app implementing the resource.
+    """
     def __init__(self, app):
         self.app = app
         super().__init__()
 
     def get(self):
+        """
+        Provides a list of all Users in the system.
+
+        URL-Argument: "detailed" (bool). Determines whether full user info is returned, or just ID & user type.
+
+        :return: List of JSON strings containing Users.
+        """
         parser = RequestParser()
 
         parser.add_argument('detailed', type=bool, location='args')
@@ -36,6 +48,19 @@ class UserResource(Resource):
             return {'message': 'No users found'}
 
     def post(self):
+        """
+        Adds new users to the database.
+
+        URL-Argument: "firstname" (str). First name
+        URL-Argument: "lastname" (str). Last name
+        URL-Argument: "email" (str). Email (Unique)
+        URL-Argument: "password" (str). Password hash
+        URL-Argument: "usertype" (str). Either 'Admin', 'Student' or 'Teacher'.
+
+        The Usertype given determines additional possible columns
+
+        :return: JSON string containing user's details
+        """
         parser = RequestParser()
 
         parser.add_argument('firstname', type=str)
@@ -109,12 +134,22 @@ class SpecifiedUserResource(Resource):
         super().__init__()
 
     def get(self, user_id):
-        user = self.app.db.get_or_404(self.app.UserModel, user_id)
+        user = self.app.UserModel.query.filter_by(id=user_id).first()
 
         if user:
-            return user.to_dict()
+            data = {
+                "response": 200,
+                "data": user.to_dict(),
+                "message": "User found."
+            }
+            return data
         else:
-            return {'message': 'User not found'}
+            data = {
+                "response": 400,
+                "data": None,
+                "message": "User does not exist."
+            }
+            return data
 
 def get_user_child(app, user):
 
