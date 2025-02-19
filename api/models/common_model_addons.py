@@ -4,7 +4,7 @@ from sqlalchemy import Column, Integer, DateTime, func
 class BaseIDandTableName(object):
     @declared_attr
     def __tablename__(cls):
-        return cls.__name__.lower()
+        return str(cls.__name__).lower().replace("model","")
 
     id = Column(Integer, primary_key=True, autoincrement=True)
 
