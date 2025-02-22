@@ -236,9 +236,15 @@ class SpecifiedUserResource(Resource):
         user = self.app.UserModel.query.filter_by(id=user_id).first()
 
         if user:
+            data = user.to_dict(detailed=True)
+            child, child_type = get_user_child(self.app, user.id)
+
+            if child:
+                data.update(child.to_dict(detailed=True))
+
             response = {
                 "response": 200,
-                "data": user.to_dict(),
+                "data": data,
                 "message": "User found."
             }
             return response
@@ -256,8 +262,9 @@ def get_user_child(app, user_id):
     Helper function to get the User's type and the relevant record.
 
     :param app: The current flask app, to provide context for DB models
-    :param user_id: The user in question. Should be provided as a User ID
-    :return:
+    :param user_id: The ID of the user in question.
+    This should be the ID of the User table, not the admin/student/teacher table.
+    :return: The child record and type of user, or None if none found.
     """
 
     # Get all records of Student, Teacher or Admin that match the user's id.
