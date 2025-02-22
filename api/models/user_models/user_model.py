@@ -13,14 +13,14 @@ class User:
             firstname = self.db.Column(self.db.String, nullable=False)
             lastname = self.db.Column(self.db.String, nullable=False)
             email = self.db.Column(self.db.String, unique=True, nullable=False)
-            password = self.db.Column(self.db.String, nullable=False)
+            password_hash = self.db.Column(self.db.String, nullable=False)
 
-            def __init__(self, firstname, lastname, email, password):
+            def __init__(self, firstname, lastname, email, password_hash):
                 super().__init__()
                 self.firstname = firstname
                 self.lastname = lastname
                 self.email = email
-                self.password = password
+                self.password_hash = password_hash
 
             def to_dict(self, detailed=False):
                 # TODO: Move JSON Serialisation related functions to use Marshmallow Schemas
