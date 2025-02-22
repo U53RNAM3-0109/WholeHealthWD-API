@@ -1,6 +1,7 @@
 import sqlalchemy.exc
 from flask_restful import Api, Resource
 from flask_restful.reqparse import RequestParser
+from .auth import password_hasher
 
 
 class UserResource(Resource):
@@ -84,7 +85,7 @@ class UserResource(Resource):
         URL-Argument: "firstname" (str). First name
         URL-Argument: "lastname" (str). Last name
         URL-Argument: "email" (str). Email (Unique)
-        URL-Argument: "password" (str). Password hash
+        URL-Argument: "password" (str). Password
         URL-Argument: "usertype" (str). Either 'Admin', 'Student' or 'Teacher'.
 
         The Usertype given determines additional possible columns
@@ -104,12 +105,12 @@ class UserResource(Resource):
         data = parser.parse_args(strict=False)
         try:
             # Get user's type and add the type specific attributes, if any, to the arg list
-            usertype = data['usertype']
-            if usertype == 'Student':
+            usertype = data['usertype'].lower()
+            if usertype == 'student':
                 pass
-            elif usertype == 'Teacher':
+            elif usertype == 'teacher':
                 pass
-            elif usertype == 'Admin':
+            elif usertype == 'admin':
                 parser.add_argument('accessrank', type=str)
             else:
                 # If the usertype isn't accepted, raise ValueError
@@ -118,27 +119,30 @@ class UserResource(Resource):
             # Parse additional args as added by type
             data = parser.parse_args()
 
+            pass_hash = password_hasher(data['password'])
+
             # Create a new user
             new_user = self.app.UserModel(
                 firstname=data['firstname'],
                 lastname=data['lastname'],
-                email=data['email'],
-                password=data['password'])
+                email=data['email'].lower(),
+                password_hash=pass_hash
+            )
 
             # Create the provided user type record, then add both to the session
-            if usertype == 'Student':
+            if usertype == 'student':
                 new_student = self.app.StudentModel(
                     user_id=new_user.id,
                 )
                 self.app.db.session.add(new_user, new_student)
 
-            elif usertype == 'Teacher':
+            elif usertype == 'teacher':
                 new_teacher = self.app.StudentModel(
                     user_id=new_user.id,
                 )
                 self.app.db.session.add(new_user, new_teacher)
 
-            elif usertype == 'Admin':
+            elif usertype == 'admin':
                 new_admin = self.app.AdminModel(
                     user_id=new_user.id,
                     access_rank=data['accessrank']
@@ -252,7 +256,7 @@ def get_user_child(app, user_id):
     Helper function to get the User's type and the relevant record.
 
     :param app: The current flask app, to provide context for DB models
-    :param user: The user in question. Should be provided as a User ID
+    :param user_id: The user in question. Should be provided as a User ID
     :return:
     """
 
