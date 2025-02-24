@@ -36,10 +36,10 @@ class BtecBytesAPI(Flask):
         self.api.init_app(self)
 
     def define_models(self):
-        self.UserModel = User(self, self.db).define_model()
-        self.AdminModel = Admin(self, self.db).define_model()
-        self.StudentModel = Student(self, self.db).define_model()
-        self.TeacherModel = Teacher(self, self.db).define_model()
+        self.UserModel = User(self.db).define_model()
+        self.AdminModel = Admin(self.db).define_model()
+        self.StudentModel = Student(self.db).define_model()
+        self.TeacherModel = Teacher(self.db).define_model()
 
     def register_triggers(self):
         def prevent_multiple_user_types(mapper, connection, target):
