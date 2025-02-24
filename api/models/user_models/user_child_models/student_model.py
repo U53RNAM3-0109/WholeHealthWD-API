@@ -5,8 +5,7 @@ from api.models import common_model_addons as cmn
 
 class Student:
 
-    def __init__(self, app, db):
-        self.app: Flask = app
+    def __init__(self, db):
         self.db: SQLAlchemy() = db
 
     def define_model(self):
