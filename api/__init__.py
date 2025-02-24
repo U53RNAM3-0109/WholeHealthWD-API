@@ -9,6 +9,7 @@ from .models.user_models.user_child_models.teacher_model import Teacher
 
 from .resources import user
 from .resources import auth
+from .resources import debug
 
 from flask import Flask
 from flask_restful import Api
@@ -34,6 +35,7 @@ class BtecBytesAPI(Flask):
         self.api.add_resource(user.UserResource, "/user", resource_class_kwargs={'app': self})
         self.api.add_resource(user.SpecifiedUserResource, "/user/<user_id>", resource_class_kwargs={'app': self})
         self.api.add_resource(auth.UserAuthResource, "/auth", resource_class_kwargs={'app': self})
+        self.api.add_resource(debug.DebugResource, "/")
 
         self.api.init_app(self)
 
