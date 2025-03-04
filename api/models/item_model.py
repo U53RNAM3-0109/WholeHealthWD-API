@@ -13,7 +13,11 @@ class Item:
             item_title = self.db.Column(self.db.String, nullable=False)
             item_snippet = self.db.Column(self.db.String, nullable=False)
             item_description = self.db.Column(self.db.String, nullable=False)
-            item_price = self.db.Column(self.db.Int, nullable=False)
+            item_price = self.db.Column(self.db.Float, nullable=False)
+            category_id = self.db.Column(self.db.Integer, self.db.ForeignKey('category.id'), unique=True)
+
+            category = self.db.relationship('CategoryModel', backref='item', uselist=False)
+
 
             def __init__(self, title, snippet, description, price):
                 super().__init__()
@@ -28,7 +32,9 @@ class Item:
                             'title': self.title,
                             'snippet': self.snippet,
                             'description': self.description,
-                            'price': self.item_price}
+                            'price': self.item_price,
+                            'category_id': self.category_id,
+                            'category_title': self.category.title}
                 else:
                     data = {'id': self.id}
                 return data

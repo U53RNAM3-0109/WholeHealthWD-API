@@ -71,15 +71,24 @@ class ItemResource(Resource):
         """
         parser = RequestParser()  # Init req parser
 
+        parser.add_argument('category_id', type=int)
+        parser.add_argument('title', type=str)
+        parser.add_argument('snippet', type=str)
+        parser.add_argument('description', type=str)
+        parser.add_argument('price', type=float)
+
         # Parse args from request.
         data = parser.parse_args()
         try:
             data = parser.parse_args()
 
-
-            # Create a new item
+            # Create a new category
             new_item = self.app.ItemModel(
-
+                title=data["title"],
+                snippet=data["snippet"],
+                description=data["description"],
+                price=data["price"],
+                category_id=data["category_id"]
             )
 
             self.app.db.session.commit()
@@ -157,10 +166,10 @@ class SpecifiedItemResource(Resource):
         :param item_id: The ID of the item in question
         :return: Response JSON with 'response', 'data', 'message' and possibly 'exception'.
         """
-        user = self.app.UserModel.query.filter_by(id=user_id).first()
+        item = self.app.ItemModel.query.filter_by(id=item_id).first()
 
-        if user:
-            data = user.to_dict(detailed=True)
+        if item:
+            data = item.to_dict(detailed=True)
 
             response = {
                 "response": 200,

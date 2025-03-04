@@ -16,7 +16,7 @@ from flask import Flask
 from flask_restful import Api
 
 
-class BtecBytesAPI(Flask):
+class WholeHealthAPI(Flask):
     api: Api
     db: SQLAlchemy
 
@@ -35,12 +35,12 @@ class BtecBytesAPI(Flask):
         self.api.add_resource(user.UserResource, "/user", resource_class_kwargs={'app': self})
         self.api.add_resource(user.SpecifiedUserResource, "/user/<user_id>", resource_class_kwargs={'app': self})
         self.api.add_resource(auth.UserAuthResource, "/auth", resource_class_kwargs={'app': self})
-        self.api.add_resource(user.UserResource, "/category", resource_class_kwargs={'app': self})
-        self.api.add_resource(user.UserResource, "/category/<category_id>", resource_class_kwargs={'app': self})
-        self.api.add_resource(user.UserResource, "/item", resource_class_kwargs={'app': self})
-        self.api.add_resource(user.UserResource, "/item/<item_id>", resource_class_kwargs={'app': self})
-        self.api.add_resource(user.UserResource, "/wishlist", resource_class_kwargs={'app': self})
-        self.api.add_resource(user.UserResource, "/wishlist/<wishlist_id>", resource_class_kwargs={'app': self})
+        self.api.add_resource(category.CategoryResource, "/category", resource_class_kwargs={'app': self})
+        self.api.add_resource(category.SpecifiedCategoryResource, "/category/<category_id>", resource_class_kwargs={'app': self})
+        self.api.add_resource(item.ItemResource, "/item", resource_class_kwargs={'app': self})
+        self.api.add_resource(item.SpecifiedItemResource, "/item/<item_id>", resource_class_kwargs={'app': self})
+        self.api.add_resource(wishlist.WishlistResource, "/wishlist", resource_class_kwargs={'app': self})
+        self.api.add_resource(wishlist.SpecifiedWishlistResource, "/wishlist/<wishlist_id>", resource_class_kwargs={'app': self})
 
         self.api.init_app(self)
 

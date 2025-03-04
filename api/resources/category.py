@@ -71,6 +71,10 @@ class CategoryResource(Resource):
         """
         parser = RequestParser()  # Init req parser
 
+        parser.add_argument('title', type=str)
+        parser.add_argument('snippet', type=str)
+        parser.add_argument('description', type=str)
+
         # Parse args from request.
         data = parser.parse_args()
         try:
@@ -79,7 +83,9 @@ class CategoryResource(Resource):
 
             # Create a new category
             new_category = self.app.CategoryModel(
-
+                title=data["title"],
+                snippet=data["snippet"],
+                description=data["description"]
             )
 
             self.app.db.session.commit()
@@ -157,10 +163,10 @@ class SpecifiedCategoryResource(Resource):
         :param category_id: The ID of the category in question
         :return: Response JSON with 'response', 'data', 'message' and possibly 'exception'.
         """
-        user = self.app.UserModel.query.filter_by(id=user_id).first()
+        catgegory = self.app.CategoryModel.query.filter_by(id=category_id).first()
 
-        if user:
-            data = user.to_dict(detailed=True)
+        if catgegory:
+            data = catgegory.to_dict(detailed=True)
 
             response = {
                 "response": 200,
