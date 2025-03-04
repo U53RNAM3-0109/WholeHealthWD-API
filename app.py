@@ -1,9 +1,9 @@
-from api import BtecBytesAPI
+from api import WholeHealthAPI
 
 if __name__ == "__main__":
     # App is being run directly, consider this a development environment
 
-    app = BtecBytesAPI(__name__, 'sqlite:///test.db')
+    app = WholeHealthAPI(__name__, 'sqlite:///test.db')
     app.run(debug=True)
 else:
     # App is being run as app.py, having been imported by another program
@@ -17,4 +17,4 @@ else:
 
     db_uri = keyvault.get_secret("api-db-uri")
 
-    app = BtecBytesAPI(__name__, db_uri)
+    app = WholeHealthAPI(__name__, db_uri)

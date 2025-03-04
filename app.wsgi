@@ -2,7 +2,7 @@ import sys
 import os
 
 # Path to project directory & venv
-proj_home = 'var/www/html/agile-api'
+proj_home = 'var/www/html/WholeHealthWD-API'
 venv_path = 'var/www/html/apivenv'
 
 # Add dir to sys.path
