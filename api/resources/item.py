@@ -76,6 +76,8 @@ class ItemResource(Resource):
         parser.add_argument('snippet', type=str)
         parser.add_argument('description', type=str)
         parser.add_argument('price', type=float)
+        parser.add_argument('image_64', type=str)
+        parser.add_argument('image_format', type=str)
 
         # Parse args from request.
         data = parser.parse_args()
@@ -88,19 +90,23 @@ class ItemResource(Resource):
                 snippet=data["snippet"],
                 description=data["description"],
                 price=data["price"],
-                category_id=data["category_id"]
+                category_id=data["category_id"],
+                image_64=data["image_64"],
+                image_format=data["image_format"]
             )
 
+            self.app.db.session.add(new_item)
             self.app.db.session.commit()
 
         except sqlalchemy.exc.IntegrityError as exc:
             # In  the case of an Integrity error, such as from UNIQUE constraint violation in Email.
 
             # Return a response detailing as such.
+            print("INTEGR")
             response = {
                 "response": 400,
                 "data": None,
-                "exception": exc,
+                "exception": "INTEGRITY",
                 "message": "IntegrityError exception occurred. This may be due to violating UNIQUE constraint, "
                            "such as on the Email field. See 'Exception' for more info."
             }
@@ -129,6 +135,12 @@ class ItemResource(Resource):
         if new_item:  # If a new item was successfully created
             # Add to a dict for response
             data = new_item.to_dict(True)
+
+            category = self.app.CategoryModel.query.filter_by(id=new_item.category_id).first()
+
+            data['cat_url_ext'] = category.category_url_ext
+
+            print(data)
 
             response = {
                 "response": 200,
@@ -178,6 +190,29 @@ class SpecifiedItemResource(Resource):
             }
             return response
         else:
+            response = {
+                "response": 400,
+                "data": None,
+                "message": "Item does not exist."
+            }
+            return response
+
+    def delete(self, item_id):
+        item = self.app.ItemModel.query.filter_by(id=item_id).first()
+
+        if item:
+            self.app.db.session.delete(item)
+            self.app.db.session.commit()
+
+            response = {
+                "response": 200,
+                "data": None,
+                "message": "Item deleted."
+            }
+            return response
+        else:
+            self.app.db.session.rollback()
+
             response = {
                 "response": 400,
                 "data": None,

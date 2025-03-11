@@ -4,7 +4,7 @@ if __name__ == "__main__":
     # App is being run directly, consider this a development environment
 
     app = WholeHealthAPI(__name__, 'sqlite:///test.db')
-    app.run(debug=True)
+    app.run(debug=True, port=8080)
 else:
     # App is being run as app.py, having been imported by another program
     # Consider this the production environment of the Azure API Server.

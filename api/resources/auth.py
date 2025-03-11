@@ -47,7 +47,6 @@ class UserAuthResource(Resource):
                     'message': "Login authorised"
                 }
                 return response
-
         response = {
             'response': 401,
             'data': None,
@@ -57,10 +56,11 @@ class UserAuthResource(Resource):
 
 
 def password_hasher(pword):
-    hash = sha512.using(salt_size=8).hash(pword)
+    hash = sha512.hash(pword)
+
     return hash
 
 
 def password_checker(pword, hash):
-    result = sha512.using(salt_size=8).verify(pword, hash)
+    result = sha512.verify(pword, hash)
     return result

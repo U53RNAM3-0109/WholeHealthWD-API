@@ -78,6 +78,7 @@ class UserResource(Resource):
 
         :return: Response JSON with 'response', 'data', 'message' and possibly 'exception'.
         """
+
         parser = RequestParser()  # Init req parser
 
         # Add args for URL. See above for details
@@ -93,7 +94,6 @@ class UserResource(Resource):
             data = parser.parse_args()
 
             pass_hash = password_hasher(data['password'])
-
             # Create a new user
             new_user = self.app.UserModel(
                 firstname=data['firstname'],
@@ -103,16 +103,19 @@ class UserResource(Resource):
                 is_admin=data['is_admin']
             )
 
+            print("COMMIT")
+            self.app.db.session.add(new_user)
             self.app.db.session.commit()
 
         except sqlalchemy.exc.IntegrityError as exc:
+            print("INTEG CANCELLED")
             # In  the case of an Integrity error, such as from UNIQUE constraint violation in Email.
 
             # Return a response detailing as such.
             response = {
                 "response": 400,
                 "data": None,
-                "exception": exc,
+                "exception": "INTEGRITY",
                 "message": "IntegrityError exception occurred. This may be due to violating UNIQUE constraint, "
                            "such as on the Email field. See 'Exception' for more info."
             }
@@ -123,6 +126,8 @@ class UserResource(Resource):
             return response
 
         except Exception as exc:
+            print("UNKN CANCELLED")
+
             # In the case of an unknown exception, we return the details of it and print to the Python console.
             print(exc)
 
@@ -147,6 +152,7 @@ class UserResource(Resource):
                 "data": data,
                 "message": "User successfully created"
             }
+            print("USER MADE?")
 
             return response
         else:
@@ -171,7 +177,7 @@ class SpecifiedUserResource(Resource):
         self.app = app
         super().__init__()
 
-    def get(self, user_id):
+    def post(self, user_id):
         """
         Gets the requested user's data.
 

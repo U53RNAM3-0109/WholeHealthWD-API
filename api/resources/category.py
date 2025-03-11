@@ -1,6 +1,7 @@
 import sqlalchemy.exc
 from flask_restful import Api, Resource
 from flask_restful.reqparse import RequestParser
+from unicodedata import category
 
 
 class CategoryResource(Resource):
@@ -35,6 +36,8 @@ class CategoryResource(Resource):
 
         # Query for all users
         categories = self.app.CategoryModel.query.all()
+
+
         data = []
 
         for category in categories:
@@ -74,6 +77,9 @@ class CategoryResource(Resource):
         parser.add_argument('title', type=str)
         parser.add_argument('snippet', type=str)
         parser.add_argument('description', type=str)
+        parser.add_argument('url_ext', type=str)
+        parser.add_argument('image_64', type=str)
+        parser.add_argument('image_format', type=str)
 
         # Parse args from request.
         data = parser.parse_args()
@@ -83,12 +89,24 @@ class CategoryResource(Resource):
 
             # Create a new category
             new_category = self.app.CategoryModel(
-                title=data["title"],
-                snippet=data["snippet"],
-                description=data["description"]
+                category_title=data["title"],
+                category_snippet=data["snippet"],
+                category_description=data["description"],
+                category_url_ext=data["url_ext"],
+                category_image_64=data["image_64"],
+                category_image_format=data["image_format"]
             )
 
+            self.app.db.session.add(new_category)
             self.app.db.session.commit()
+
+
+            response = {
+                "response":200,
+                "data": {"url_ext":new_category.category_url_ext}
+            }
+            return response
+
 
         except sqlalchemy.exc.IntegrityError as exc:
             # In  the case of an Integrity error, such as from UNIQUE constraint violation in Email.
@@ -97,7 +115,7 @@ class CategoryResource(Resource):
             response = {
                 "response": 400,
                 "data": None,
-                "exception": exc,
+                "exception": "INTEGRITY",
                 "message": "IntegrityError exception occurred. This may be due to violating UNIQUE constraint, "
                            "such as on the Email field. See 'Exception' for more info."
             }
@@ -156,17 +174,20 @@ class SpecifiedCategoryResource(Resource):
         self.app = app
         super().__init__()
 
-    def get(self, category_id):
+    def get(self, url_ext):
         """
         Gets the requested category's data.
 
         :param category_id: The ID of the category in question
         :return: Response JSON with 'response', 'data', 'message' and possibly 'exception'.
         """
-        catgegory = self.app.CategoryModel.query.filter_by(id=category_id).first()
+        category = self.app.CategoryModel.query.filter_by(category_url_ext=url_ext).first()
 
-        if catgegory:
-            data = catgegory.to_dict(detailed=True)
+
+        if category:
+            print("Found category")
+            data = category.to_dict(detailed=True)
+            print(data["cat_items"])
 
             response = {
                 "response": 200,
@@ -175,10 +196,139 @@ class SpecifiedCategoryResource(Resource):
             }
             return response
         else:
+            print(f"Not found category: {url_ext}")
+            print(f"Cats:{self.app.CategoryModel.query.all()}")
+
             response = {
                 "response": 400,
                 "data": None,
                 "message": "Category does not exist."
             }
             return response
+
+    def delete(self, url_ext):
+        category = self.app.CategoryModel.query.filter_by(category_url_ext=url_ext).first()
+
+        if category:
+            self.app.db.session.delete(category)
+            self.app.db.session.commit()
+
+            response = {
+                "response": 200,
+                "data": None,
+                "message": "Category deleted."
+            }
+            return response
+        else:
+            self.app.db.session.rollback()
+
+            response = {
+                "response": 400,
+                "data": None,
+                "message": "Category does not exist."
+            }
+            return response
+
+    def patch(self, url_ext):
+
+        category = self.app.CategoryModel.query.filter_by(category_url_ext=url_ext).first()
+
+        if category:
+
+            try:
+                parser = RequestParser()
+
+                parser.add_argument('title', type=str)
+                parser.add_argument('snippet', type=str)
+                parser.add_argument('description', type=str)
+                parser.add_argument('url_ext', type=str)
+                parser.add_argument('image_f', type=str)
+                parser.add_argument('image_format', type=str)
+
+                data = parser.parse_args()
+
+                updated = False
+
+                if data['title']:
+                    category.category_title = data['title']
+                    updated=True
+                if data['snippet']:
+                    category.category_snippet = data['snippet']
+                    updated=True
+                if data['description']:
+                    category.category_description = data['description']
+                    updated=True
+                if data['url_ext']:
+                    category.category_url_ext = data['url_ext']
+                    updated=True
+                if data['image_f']:
+                    category.category_image = data['image_f']
+                    updated=True
+                if data['image_format']:
+                    category.category_image_format = data['image_format']
+                    updated=True
+
+
+                if updated:
+                    self.app.db.session.commit()
+                    response = {
+                        "response": 200,
+                        "data": None,
+                        "message": "Category updated."
+                    }
+
+                    return response
+                else:
+                    response = {
+                        "response": 400,
+                        "data": None,
+                        "message": "No updates were provided."
+                    }
+
+                    return response
+
+            except sqlalchemy.exc.IntegrityError as exc:
+                # In  the case of an Integrity error, such as from UNIQUE constraint violation in Email.
+
+                # Return a response detailing as such.
+                response = {
+                    "response": 400,
+                    "data": None,
+                    "exception": exc,
+                    "message": "IntegrityError exception occurred. This may be due to violating UNIQUE constraint, "
+                               "such as on the Email field. See 'Exception' for more info."
+                }
+
+                # Then roll back the session to last commit
+                self.app.db.session.rollback()
+
+                return response
+
+            except Exception as exc:
+                # In the case of an unknown exception, we return the details of it and print to the Python console.
+                print(exc)
+
+                response = {
+                    "response": 500,
+                    "data": None,
+                    "exception": exc,
+                    "message": "Unhandled exception occurred, see 'exception' for more information."
+                }
+
+                # As before, we roll back the session to the last commit
+                self.app.db.session.rollback()
+
+                return response
+
+        else:
+            self.app.db.session.rollback()
+
+            response = {
+                "response": 400,
+                "data": None,
+                "message": "Category does not exist."
+            }
+            return response
+
+
 

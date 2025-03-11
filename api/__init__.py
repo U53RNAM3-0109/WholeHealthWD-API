@@ -22,6 +22,10 @@ class WholeHealthAPI(Flask):
 
     def __init__(self, __name__, db_uri):
         super().__init__(__name__)
+        self.WishlistModel = None
+        self.UserModel = None
+        self.CategoryModel = None
+        self.ItemModel = None
         self.api = Api(self)
         self.config["SQLALCHEMY_DATABASE_URI"] = db_uri
         self.db = SQLAlchemy()
@@ -36,7 +40,7 @@ class WholeHealthAPI(Flask):
         self.api.add_resource(user.SpecifiedUserResource, "/user/<user_id>", resource_class_kwargs={'app': self})
         self.api.add_resource(auth.UserAuthResource, "/auth", resource_class_kwargs={'app': self})
         self.api.add_resource(category.CategoryResource, "/category", resource_class_kwargs={'app': self})
-        self.api.add_resource(category.SpecifiedCategoryResource, "/category/<category_id>", resource_class_kwargs={'app': self})
+        self.api.add_resource(category.SpecifiedCategoryResource, "/category/<url_ext>", resource_class_kwargs={'app': self})
         self.api.add_resource(item.ItemResource, "/item", resource_class_kwargs={'app': self})
         self.api.add_resource(item.SpecifiedItemResource, "/item/<item_id>", resource_class_kwargs={'app': self})
         self.api.add_resource(wishlist.WishlistResource, "/wishlist", resource_class_kwargs={'app': self})
@@ -46,6 +50,6 @@ class WholeHealthAPI(Flask):
 
     def define_models(self):
         self.UserModel = User(self, self.db).define_model()
-        self.CategoryModel = Category(self, self.db).define_model()
         self.ItemModel = Item(self, self.db).define_model()
+        self.CategoryModel = Category(self, self.db).define_model()
         self.WishlistModel = Wishlist(self, self.db).define_model()
